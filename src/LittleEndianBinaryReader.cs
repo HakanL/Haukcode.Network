@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Haukcode.Network
 {
-    public class LittleEndianBinaryReader
+    public class LittleEndianBinaryReader : IBinaryReader
     {
         private int readPosition = 0;
         private readonly ReadOnlyMemory<byte> buffer;
@@ -15,6 +15,10 @@ namespace Haukcode.Network
         {
             this.buffer = buffer;
         }
+
+        public int BytesRead => this.readPosition;
+
+        public ReadOnlyMemory<byte> Memory => this.buffer[this.readPosition..];
 
         public short ReadInt16()
         {

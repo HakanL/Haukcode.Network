@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Haukcode.Network
 {
-    public class BigEndianBinaryWriter
+    public class BigEndianBinaryWriter : IBinaryWriter
     {
         private int writePosition = 0;
         private readonly Memory<byte> buffer;
@@ -15,7 +15,7 @@ namespace Haukcode.Network
             this.buffer = buffer;
         }
 
-        public int WrittenBytes => this.writePosition;
+        public int BytesWritten => this.writePosition;
 
         public Memory<byte> Memory => this.buffer.Slice(this.writePosition);
 
