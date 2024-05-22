@@ -11,6 +11,8 @@ namespace Haukcode.Network
 
         int BytesRead { get; }
 
+        int BytesLeft { get; }
+
         short ReadInt16();
 
         ushort ReadUInt16();

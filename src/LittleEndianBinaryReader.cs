@@ -18,6 +18,8 @@ namespace Haukcode.Network
 
         public int BytesRead => this.readPosition;
 
+        public int BytesLeft => this.buffer.Length - this.readPosition;
+
         public ReadOnlyMemory<byte> Memory => this.buffer[this.readPosition..];
 
         public short ReadInt16()
