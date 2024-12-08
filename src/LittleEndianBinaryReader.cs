@@ -62,22 +62,32 @@ namespace Haukcode.Network
             return (uint)((b1 << 24) | (b2 << 16) | (b3 << 8) | b4);
         }
 
-        public byte[] ReadBytes(int bytes)
+        public ReadOnlyMemory<byte> ReadSlice(int bytes)
         {
             var span = this.buffer.Slice(this.readPosition, bytes);
 
             this.readPosition += bytes;
 
-            return span.ToArray();
+            return span;
         }
 
-        public byte[] ReadBytes()
+        public ReadOnlyMemory<byte> ReadSlice()
         {
             var span = this.buffer[this.readPosition..];
 
             this.readPosition += span.Length;
 
-            return span.ToArray();
+            return span;
+        }
+
+        public byte[] ReadBytes(int bytes)
+        {
+            return ReadSlice(bytes).ToArray();
+        }
+
+        public byte[] ReadBytes()
+        {
+            return ReadSlice().ToArray();
         }
 
         public bool VerifyBytes(byte[] bytes)
