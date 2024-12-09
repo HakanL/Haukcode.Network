@@ -34,5 +34,9 @@ namespace Haukcode.Network
         string ReadString();
 
         byte ReadByte();
+
+        ReadOnlyMemory<byte> ReadSlice(int bytes);
+
+        ReadOnlyMemory<byte> ReadSlice();
     }
 }
