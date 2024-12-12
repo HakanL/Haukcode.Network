@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Text;
 
 namespace Haukcode.Network
@@ -127,6 +129,39 @@ namespace Haukcode.Network
             }
 
             return new IPAddress(broadcastAddress);
+        }
+
+        /// <summary>
+        /// Sets the non-exclusive, reuse and ICMP options
+        /// </summary>
+        /// <param name="socket">Socket</param>
+        public static void SetSocketOptions(Socket socket)
+        {
+            // Set the SIO_UDP_CONNRESET ioctl to true for this UDP socket. If this UDP socket
+            //    ever sends a UDP packet to a remote destination that exists but there is
+            //    no socket to receive the packet, an ICMP port unreachable message is returned
+            //    to the sender. By default, when this is received the next operation on the
+            //    UDP socket that send the packet will receive a SocketException. The native
+            //    (Winsock) error that is received is WSAECONNRESET (10054). Since we don't want
+            //    to wrap each UDP socket operation in a try/except, we'll disable this error
+            //    for the socket with this ioctl call.
+            try
+            {
+                uint IOC_IN = 0x80000000;
+                uint IOC_VENDOR = 0x18000000;
+                uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+
+                byte[] optionInValue = { Convert.ToByte(false) };
+                byte[] optionOutValue = new byte[4];
+                socket.IOControl((int)SIO_UDP_CONNRESET, optionInValue, optionOutValue);
+            }
+            catch
+            {
+                Debug.WriteLine("Unable to set SIO_UDP_CONNRESET, maybe not supported.");
+            }
+
+            socket.ExclusiveAddressUse = false;
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
         }
     }
 }
