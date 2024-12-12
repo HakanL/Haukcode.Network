@@ -9,6 +9,9 @@ namespace Haukcode.Network
 {
     public static class Helper
     {
+        public const byte MULTICAST_BYTE_1 = (byte)239;
+        public const byte MULTICAST_BYTE_2 = (byte)255;
+
         public static IEnumerable<Adapter> GetAddressesFromInterfaceType(NetworkInterfaceType[] interfaceTypes, bool excludeHyperV = true)
         {
             foreach (NetworkInterface adapter in NetworkInterface.GetAllNetworkInterfaces())
@@ -86,6 +89,27 @@ namespace Haukcode.Network
             }
 
             return (null, null, null);
+        }
+
+        /// <summary>
+        /// Get Multicast address from universe id
+        /// </summary>
+        /// <param name="universeId">Universe Id</param>
+        /// <returns></returns>
+        public static IPAddress GetMulticastAddress(ushort universeId)
+        {
+            byte highUniverseId = (byte)(universeId >> 8);
+            byte lowUniverseId = (byte)(universeId & 0xFF);
+            var multicastAddress = new IPAddress(new byte[] { MULTICAST_BYTE_1, MULTICAST_BYTE_2, highUniverseId, lowUniverseId });
+
+            return multicastAddress;
+        }
+
+        public static bool IsMulticast(IPAddress address)
+        {
+            byte[] addressBytes = address.GetAddressBytes();
+
+            return addressBytes[0] == MULTICAST_BYTE_1 && addressBytes[1] == MULTICAST_BYTE_2;
         }
     }
 }
