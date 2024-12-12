@@ -30,6 +30,7 @@ namespace Haukcode.Network
         {
             var span = buffer.Span;
 
+            // High byte, Low byte
             span[this.writePosition++] = (byte)(value >> 8);
             span[this.writePosition++] = (byte)value;
         }
@@ -38,6 +39,7 @@ namespace Haukcode.Network
         {
             var span = buffer.Span;
 
+            // High byte, Low byte
             span[this.writePosition++] = (byte)(value >> 8);
             span[this.writePosition++] = (byte)value;
         }
@@ -46,6 +48,7 @@ namespace Haukcode.Network
         {
             var span = buffer.Span;
 
+            // Low byte, High byte
             span[this.writePosition++] = (byte)value;
             span[this.writePosition++] = (byte)(value >> 8);
         }
@@ -54,6 +57,7 @@ namespace Haukcode.Network
         {
             var span = buffer.Span;
 
+            // Low byte, High byte
             span[this.writePosition++] = (byte)value;
             span[this.writePosition++] = (byte)(value >> 8);
         }
@@ -92,47 +96,29 @@ namespace Haukcode.Network
             this.writePosition += bytes.Length;
         }
 
-        public void WriteString(string value, int length)
+        public void WriteZeros(int count)
         {
-            //FIXME
-            WriteBytes(Encoding.UTF8.GetBytes(value));
-            WriteBytes(Enumerable.Repeat((byte)0, length - value.Length).ToArray());
+            // Clear the section of the buffer directly
+            this.buffer[this.writePosition..(this.writePosition + count)].Span.Clear();
+
+            this.writePosition += count;
         }
 
-        private byte[] GuidToByteArray(Guid input)
+        public void WriteString(string value, int length)
         {
-            var bytes = input.ToByteArray();
+            // Encode the string directly into the buffer
+            int bytesWritten = Encoding.UTF8.GetBytes(value, this.buffer[this.writePosition..(this.writePosition + length)].Span);
 
-            return new byte[] {
-                bytes[3],
-                bytes[2],
-                bytes[1],
-                bytes[0],
+            // Fill the remaining bytes with zero
+            this.buffer[(this.writePosition + bytesWritten)..(this.writePosition + length)].Span.Clear();
 
-                bytes[5],
-                bytes[4],
-
-                bytes[7],
-                bytes[6],
-
-                bytes[8],
-                bytes[9],
-
-                bytes[10],
-                bytes[11],
-                bytes[12],
-                bytes[13],
-                bytes[14],
-                bytes[15]
-            };
+            this.writePosition += length;           
         }
 
         public void WriteGuid(Guid value)
         {
-            // Fixme
-            var bytes = GuidToByteArray(value);
-
-            WriteBytes(bytes);
+            if (value.TryWriteBytes(this.buffer[this.writePosition..].Span))
+                this.writePosition += 16;
         }
     }
 }
