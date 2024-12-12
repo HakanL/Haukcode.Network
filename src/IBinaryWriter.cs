@@ -17,6 +17,10 @@ namespace Haukcode.Network
 
         void WriteUInt16(ushort value);
 
+        void WriteInt16Reverse(short value);
+
+        void WriteUInt16Reverse(ushort value);
+
         void WriteInt32(int value);
 
         void WriteUInt32(uint value);

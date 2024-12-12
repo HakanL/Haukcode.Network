@@ -42,6 +42,22 @@ namespace Haukcode.Network
             span[this.writePosition++] = (byte)value;
         }
 
+        public void WriteInt16Reverse(short value)
+        {
+            var span = buffer.Span;
+
+            span[this.writePosition++] = (byte)value;
+            span[this.writePosition++] = (byte)(value >> 8);
+        }
+
+        public void WriteUInt16Reverse(ushort value)
+        {
+            var span = buffer.Span;
+
+            span[this.writePosition++] = (byte)value;
+            span[this.writePosition++] = (byte)(value >> 8);
+        }
+
         public void WriteInt32(int value)
         {
             var span = buffer.Span;
