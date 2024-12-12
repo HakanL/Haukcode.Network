@@ -38,5 +38,11 @@ namespace Haukcode.Network
         ReadOnlyMemory<byte> ReadSlice(int bytes);
 
         ReadOnlyMemory<byte> ReadSlice();
+
+        ushort ReadUInt16Reverse();
+
+        short ReadInt16Reverse();
+
+        void SkipBytes(int count);
     }
 }

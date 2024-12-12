@@ -40,6 +40,24 @@ namespace Haukcode.Network
             return (ushort)((b1 << 8) | b2);
         }
 
+        public short ReadInt16Reverse()
+        {
+            var span = this.buffer.Span;
+            byte b2 = span[this.readPosition++];
+            byte b1 = span[this.readPosition++];
+
+            return (short)((b1 << 8) | b2);
+        }
+
+        public ushort ReadUInt16Reverse()
+        {
+            var span = this.buffer.Span;
+            byte b2 = span[this.readPosition++];
+            byte b1 = span[this.readPosition++];
+
+            return (ushort)((b1 << 8) | b2);
+        }
+
         public int ReadInt32()
         {
             var span = this.buffer.Span;
@@ -80,6 +98,11 @@ namespace Haukcode.Network
             return span;
         }
 
+        public void SkipBytes(int count)
+        {
+            this.readPosition += count;
+        }
+
         public byte[] ReadBytes(int bytes)
         {
             return ReadSlice(bytes).ToArray();
@@ -106,31 +129,11 @@ namespace Haukcode.Network
 
         public Guid ReadGuid()
         {
-            var input = this.buffer.Slice(this.readPosition).Span;
+            var result = new Guid(this.buffer[this.readPosition..].Span);
+
             this.readPosition += 16;
 
-            return new Guid(new byte[] {
-                input[3],
-                input[2],
-                input[1],
-                input[0],
-
-                input[5],
-                input[4],
-
-                input[7],
-                input[6],
-
-                input[8],
-                input[9],
-
-                input[10],
-                input[11],
-                input[12],
-                input[13],
-                input[14],
-                input[15]
-            });
+            return result;
         }
 
         public string ReadString(int bytes)

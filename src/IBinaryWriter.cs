@@ -32,6 +32,7 @@ namespace Haukcode.Network
         void WriteString(string value, int length);
 
         void WriteGuid(Guid value);
+
         void WriteZeros(int count);
     }
 }
