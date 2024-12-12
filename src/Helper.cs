@@ -111,5 +111,22 @@ namespace Haukcode.Network
 
             return addressBytes[0] == MULTICAST_BYTE_1 && addressBytes[1] == MULTICAST_BYTE_2;
         }
+
+        public static IPAddress GetBroadcastAddress(IPAddress address, IPAddress subnetMask)
+        {
+            byte[] ipAdressBytes = address.GetAddressBytes();
+            byte[] subnetMaskBytes = subnetMask.GetAddressBytes();
+
+            if (ipAdressBytes.Length != subnetMaskBytes.Length)
+                throw new ArgumentException("Lengths of IP address and subnet mask do not match.");
+
+            byte[] broadcastAddress = new byte[ipAdressBytes.Length];
+            for (int i = 0; i < broadcastAddress.Length; i++)
+            {
+                broadcastAddress[i] = (byte)(ipAdressBytes[i] | (subnetMaskBytes[i] ^ 255));
+            }
+
+            return new IPAddress(broadcastAddress);
+        }
     }
 }
