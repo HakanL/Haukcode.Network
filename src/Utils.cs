@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Haukcode.Network
 {
-    public static class Helper
+    public static class Utils
     {
         public const byte MULTICAST_BYTE_1 = (byte)239;
         public const byte MULTICAST_BYTE_2 = (byte)255;
