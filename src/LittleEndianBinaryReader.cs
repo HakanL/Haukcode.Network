@@ -129,7 +129,7 @@ namespace Haukcode.Network
 
         public Guid ReadGuid()
         {
-            var result = new Guid(this.buffer[this.readPosition..].Span);
+            var result = new Guid(this.buffer[this.readPosition..(this.readPosition + 16)].Span);
 
             this.readPosition += 16;
 
