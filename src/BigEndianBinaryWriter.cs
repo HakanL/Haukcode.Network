@@ -112,13 +112,35 @@ namespace Haukcode.Network
             // Fill the remaining bytes with zero
             this.buffer[(this.writePosition + bytesWritten)..(this.writePosition + length)].Span.Clear();
 
-            this.writePosition += length;           
+            this.writePosition += length;
         }
 
         public void WriteGuid(Guid value)
         {
-            if (value.TryWriteBytes(this.buffer[this.writePosition..].Span))
-                this.writePosition += 16;
+            byte[] bytes = value.ToByteArray();
+
+            WriteBytes(new byte[] {
+                bytes[3],
+                bytes[2],
+                bytes[1],
+                bytes[0],
+
+                bytes[5],
+                bytes[4],
+
+                bytes[7],
+                bytes[6],
+
+                bytes[8],
+                bytes[9],
+
+                bytes[10],
+                bytes[11],
+                bytes[12],
+                bytes[13],
+                bytes[14],
+                bytes[15]
+            });
         }
     }
 }

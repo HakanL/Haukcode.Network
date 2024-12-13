@@ -129,11 +129,31 @@ namespace Haukcode.Network
 
         public Guid ReadGuid()
         {
-            var result = new Guid(this.buffer[this.readPosition..(this.readPosition + 16)].Span);
-
+            var input = this.buffer[readPosition..].Span;
             this.readPosition += 16;
 
-            return result;
+            return new Guid(new byte[] {
+                input[3],
+                input[2],
+                input[1],
+                input[0],
+
+                input[5],
+                input[4],
+
+                input[7],
+                input[6],
+
+                input[8],
+                input[9],
+
+                input[10],
+                input[11],
+                input[12],
+                input[13],
+                input[14],
+                input[15]
+            });
         }
 
         public string ReadString(int bytes)
