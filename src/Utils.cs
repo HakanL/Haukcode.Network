@@ -90,6 +90,25 @@ namespace Haukcode.Network
                 return (firstIpv4.IP, firstIpv4.NetMask, firstWifiAdapter.PhysicalAddress);
             }
 
+            // See if there are any HyperV adapters
+            adapters = GetCommonAdapters(excludeHyperV: false);
+            firstEthernetAdapter = adapters.FirstOrDefault(x => x.Type == NetworkInterfaceType.Ethernet);
+            if (firstEthernetAdapter != null)
+            {
+                var firstIpv4 = firstEthernetAdapter.AllIpv4Addresses.First();
+
+                return (firstIpv4.IP, firstIpv4.NetMask, firstEthernetAdapter.PhysicalAddress);
+            }
+
+            // Then just any with IPv4 address
+            var firstAdapter = adapters.FirstOrDefault(x => x.AllIpv4Addresses.Any());
+            if (firstAdapter != null)
+            {
+                var firstIpv4 = firstAdapter.AllIpv4Addresses.First();
+
+                return (firstIpv4.IP, firstIpv4.NetMask, firstAdapter.PhysicalAddress);
+            }
+
             return (null, null, null);
         }
 
