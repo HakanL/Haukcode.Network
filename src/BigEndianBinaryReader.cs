@@ -129,10 +129,14 @@ namespace Haukcode.Network
 
         public Guid ReadGuid()
         {
-            var input = this.buffer[readPosition..].Span;
+            var input = this.buffer.Slice(this.readPosition, 16).Span;
             this.readPosition += 16;
 
-            return new Guid(new byte[] {
+            // Reorder the big-endian wire bytes into the layout new Guid(ReadOnlySpan<byte>)
+            // expects (Data1/2/3 little-endian), using a stack buffer so we don't allocate a
+            // throwaway byte[16] on every packet.
+            Span<byte> reordered = stackalloc byte[16]
+            {
                 input[3],
                 input[2],
                 input[1],
@@ -153,7 +157,9 @@ namespace Haukcode.Network
                 input[13],
                 input[14],
                 input[15]
-            });
+            };
+
+            return new Guid(reordered);
         }
 
         public string ReadString(int bytes)
