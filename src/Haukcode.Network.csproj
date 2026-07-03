@@ -3,6 +3,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
+    <!-- Use modern C# syntax even on the netstandard2.1 target (compiler-only features; no
+         runtime/BCL dependency, so the target framework is unchanged). -->
+    <LangVersion>latest</LangVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Common Network Utilities</Title>
     <Description>Common Network Utilities</Description>
