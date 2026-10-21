@@ -126,11 +126,17 @@ namespace Haukcode.Network
             return multicastAddress;
         }
 
+        /// <summary>
+        /// Check if the address is a multicast address (224.0.0.0/4 for IPv4, ff00::/8 for IPv6)
+        /// </summary>
         public static bool IsMulticast(IPAddress address)
         {
+            if (address.AddressFamily == AddressFamily.InterNetworkV6)
+                return address.IsIPv6Multicast;
+
             byte[] addressBytes = address.GetAddressBytes();
 
-            return addressBytes[0] == MULTICAST_BYTE_1 && addressBytes[1] == MULTICAST_BYTE_2;
+            return (addressBytes[0] & 0xF0) == 0xE0;
         }
 
         public static IPAddress GetBroadcastAddress(IPAddress address, IPAddress subnetMask)

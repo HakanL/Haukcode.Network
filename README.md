@@ -235,7 +235,7 @@ ushort valueReversed = reader.ReadUInt16Reverse();
 | `GetCommonInterfaces(bool excludeHyperV = true)` | Returns list of adapter names with IP addresses |
 | `GetFirstBindAddress()` | Gets first available IP address (prefers Ethernet) |
 | `GetMulticastAddress(ushort universeId)` | Generates multicast address from universe ID (239.255.x.x) |
-| `IsMulticast(IPAddress address)` | Checks if address is a multicast address |
+| `IsMulticast(IPAddress address)` | Checks if address is a multicast address (IPv4 224.0.0.0/4 or IPv6 ff00::/8) |
 | `GetBroadcastAddress(IPAddress address, IPAddress subnetMask)` | Calculates broadcast address |
 | `SetSocketOptions(Socket socket)` | Configures socket with non-exclusive, reuse, and ICMP options |
 
