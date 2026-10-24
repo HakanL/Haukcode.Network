@@ -296,6 +296,10 @@ ushort valueReversed = reader.ReadUInt16Reverse();
 
 - .NET Standard 2.1
 
+## Used in production
+
+This library is used in [DMX Core 100](https://dmxcore.com), a DMX lighting controller for permanent installations that runs on Windows, macOS and Linux, or on its own touchscreen hardware. There it picks the network interfaces and multicast addresses for its lighting protocols.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
