@@ -188,5 +188,85 @@ namespace Haukcode.Network
             socket.ExclusiveAddressUse = false;
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
         }
+
+        [System.Runtime.InteropServices.DllImport("libc", SetLastError = true)]
+        private static extern int setsockopt(int socket, int level, int optionName, byte[] optionValue, uint optionLength);
+
+        // Linux: setsockopt(SOL_SOCKET, SO_BINDTODEVICE, "<ifname>\0")
+        private const int LinuxSolSocket = 1;
+        private const int LinuxSoBindToDevice = 25;
+
+        // macOS: setsockopt(IPPROTO_IP, IP_BOUND_IF, <interface index>)
+        private const int MacIpProtoIp = 0;
+        private const int MacIpBoundIf = 25;
+
+        /// <summary>
+        /// Pin a sending socket to the network interface that owns <paramref name="localAddress"/>,
+        /// so every packet leaves through that interface.
+        ///
+        /// Binding a socket to a local address only sets the source address on Linux and macOS (the
+        /// weak host model): the outgoing interface still comes from the routing table. On a host
+        /// with two interfaces on the same subnet, or when the other interface has the lower route
+        /// metric, unicast from a socket bound to one interface's address leaves through the other
+        /// one. Multicast is not affected (the kernel picks the interface of the source address),
+        /// unicast is. Windows sends from the interface that owns the source address (strong host
+        /// model), so nothing is needed there.
+        ///
+        /// Call it after <see cref="Socket.Bind"/>. Best effort: when the interface can't be found
+        /// or the option is refused (SO_BINDTODEVICE needs CAP_NET_RAW on kernels before 5.7) the
+        /// socket keeps working with routing-table egress, as it did before.
+        /// </summary>
+        /// <returns>The interface the socket was pinned to, or null when it was left as it was</returns>
+        public static string? BindToInterfaceOfAddress(Socket socket, IPAddress localAddress)
+        {
+            if (localAddress == null || IPAddress.Any.Equals(localAddress) || IPAddress.IsLoopback(localAddress))
+                return null;
+
+            bool isLinux = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux);
+            bool isMac = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX);
+
+            if (!isLinux && !isMac)
+                return null;
+
+            try
+            {
+                var networkInterface = NetworkInterface.GetAllNetworkInterfaces()
+                    .FirstOrDefault(x => x.GetIPProperties().UnicastAddresses.Any(a => a.Address.Equals(localAddress)));
+
+                if (networkInterface == null)
+                    return null;
+
+                // Socket.SetRawSocketOption is not in netstandard2.1, and SetSocketOption only
+                // passes options it knows, so go to libc directly
+                int fd = socket.Handle.ToInt32();
+                int result;
+
+                if (isLinux)
+                {
+                    byte[] name = Encoding.ASCII.GetBytes(networkInterface.Name + "\0");
+                    result = setsockopt(fd, LinuxSolSocket, LinuxSoBindToDevice, name, (uint)name.Length);
+                }
+                else
+                {
+                    byte[] index = BitConverter.GetBytes(networkInterface.GetIPProperties().GetIPv4Properties().Index);
+                    result = setsockopt(fd, MacIpProtoIp, MacIpBoundIf, index, (uint)index.Length);
+                }
+
+                if (result != 0)
+                {
+                    Debug.WriteLine($"Unable to pin the socket to {networkInterface.Name}: errno {System.Runtime.InteropServices.Marshal.GetLastWin32Error()}");
+
+                    return null;
+                }
+
+                return networkInterface.Name;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Unable to pin the socket to the interface of {localAddress}: {ex.Message}");
+
+                return null;
+            }
+        }
     }
 }
