@@ -13,6 +13,9 @@ defaults:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # push the release tag
+      id-token: write   # NuGet trusted publishing
 
     steps:
     - uses: actions/checkout@v4
@@ -51,8 +54,15 @@ jobs:
       run: dotnet test --no-restore --verbosity normal
 
     ## Publish and Tag
+    - name: NuGet login
+      id: nuget-login
+      uses: NuGet/login@v1
+      with:
+        user: HakanL
+      if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     - name: Publish NuGet
-      run: dotnet nuget push bin/Release/*.nupkg --skip-duplicate --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_KEY }}
+      run: dotnet nuget push bin/Release/*.nupkg --skip-duplicate --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
+      if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     - name: Tag
       run: |
         git tag "v${PACKAGE_VERSION}"
